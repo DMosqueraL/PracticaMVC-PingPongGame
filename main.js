@@ -7,14 +7,15 @@
     this.game_over = false;
     this.bars = [];
     this.ball = null;
-  };
+    this.playing = false;
+  }
 
   self.Board.prototype = {
     get elements() {
-      var elements = this.bars;
+      var elements = this.bars.map(function (bar) {return bar;});
       elements.push(this.ball);
       return elements;
-    },
+    }
   };
 })();
 
@@ -26,10 +27,20 @@
     this.board = board;
     this.speed_y = 0;
     this.speed_x = 3;
+    this.direction = 1;
 
     board.ball = this;
     this.kind = "circle";
-  };
+    
+  }
+
+  self.Ball.prototype = {
+    move: function () {
+      this.x += (this.speed_x*thid.direction);
+      this.y += (this.speed_y);
+    }
+  }
+
 })(function () {
   self.Bar = function (x, y, width, height, board) {
     this.x = x;
@@ -74,12 +85,15 @@
         var el = this.board.elements[i];
 
         draw(this.ctx, el);
-      }
+      };
     },
     play: function () {
-      this.clean();
-      this.draw();
-    },
+      if(this.board.playing){
+        this.clean();
+        this.draw();
+        this.board.ball.move();
+      }
+    }
   };
 
   function draw(ctx, element) {
@@ -109,13 +123,20 @@ document.addEventListener("keydown", function (ev) {
   //Se cambian los keyCodes porque están en desuso, usando la propiedad .key
 
   if (ev.key === "ArrowUp") {
+    ev.preventDefault();
     bar.up();
   } else if (ev.key === "ArrowDown") {
+    ev.preventDefault();
     bar.down();
   } else if (ev.key === "KeyW") {
+    ev.preventDefault();
     bar_2.down();
   } else if (ev.key === "KeyS") {
+    ev.preventDefault();
     bar_2.down();
+  } else if(ev.key === "Space"){
+    ev.preventDefault();
+    board.playing = !board.playing;
   }
 });
 

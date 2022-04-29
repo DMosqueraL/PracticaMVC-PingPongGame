@@ -12,13 +12,25 @@
   self.Board.prototype = {
     get elements() {
       var elements = this.bars;
-      //elements.push(this.ball);
+      elements.push(this.ball);
       return elements;
     },
   };
 })();
 
 (function () {
+  self.Ball = function (x, y, radius, board) {
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
+    this.board = board;
+    this.speed_y = 0;
+    this.speed_x = 3;
+
+    board.ball = this;
+    this.kind = "circle";
+  };
+})(function () {
   self.Bar = function (x, y, width, height, board) {
     this.x = x;
     this.y = y;
@@ -54,6 +66,9 @@
   };
 
   self.BoardView.prototype = {
+    clean: function () {
+      this.ctx.clearRect(0, 0, this.board.width, this.board.height);
+    },
     draw: function () {
       for (var i = this.board.elements.length - 1; i >= 0; i--) {
         var el = this.board.elements[i];
@@ -61,44 +76,56 @@
         draw(this.ctx, el);
       }
     },
+    play: function () {
+      this.clean();
+      this.draw();
+    },
   };
 
   function draw(ctx, element) {
-    
-      switch (element.kind) {
-        case "rectangle":
-          console.log("Hola mundo");
-          ctx.fillRect(element.x, element.y, element.width, element.height);
-          break;
-      }
-    
+    switch (element.kind) {
+      case "rectangle":
+        ctx.fillRect(element.x, element.y, element.width, element.height);
+        break;
+
+      case "circle":
+        ctx.beginPath();
+        ctx.arc(element.x, element.y, element.radius, 0, 7);
+        ctx.fill();
+        ctx.closePath();
+        break;
+    }
   }
 })();
 
-var board = new Board(300, 400);
+var board = new Board(800, 400);
 var bar = new Bar(20, 100, 40, 100, board);
 var bar_2 = new Bar(800, 100, 40, 100, board);
 var canvas = document.getElementById("canvas");
 var board_view = new BoardView(canvas, board);
+var ball = new Ball(350, 100, 10, board);
 
 document.addEventListener("keydown", function (ev) {
-  if (ev.keyCode === 38) {
+  //Se cambian los keyCodes porque están en desuso, usando la propiedad .key
+
+  if (ev.key === "ArrowUp") {
     bar.up();
-  } else if (ev.keyCode === 40) {
+  } else if (ev.key === "ArrowDown") {
     bar.down();
-  } else if (ev.keyCode === 87) {
+  } else if (ev.key === "KeyW") {
     bar_2.down();
-  } else if (ev.keyCode === 80) {
+  } else if (ev.key === "KeyS") {
     bar_2.down();
   }
 });
 
+board_view.draw();
 window.requestAnimationFrame(controller);
 
 //self.addEventListener("load", main);
 
 //Controlador
 function controller() {
-  board_view.draw();
+  board_view.play();
   window.requestAnimationFrame(controller);
 }
